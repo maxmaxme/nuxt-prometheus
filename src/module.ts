@@ -1,5 +1,5 @@
 import { defu } from 'defu'
-import { addPlugin, addServerHandler, createResolver, defineNuxtModule } from '@nuxt/kit'
+import { addPlugin, addServerHandler, addTemplate, createResolver, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
 import { name, version } from '../package.json'
 import type { AnalyticsModuleParams } from './runtime/type'
@@ -36,18 +36,31 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     const { resolve } = createResolver(import.meta.url)
     nuxt.options.build.transpile.push(resolve('runtime'))
 
-    addServerHandler({
-      route: options.prometheusPath,
-      method: 'get',
-      handler: resolve('./runtime/handler'),
-    })
-
-    if (options.healthCheck) {
-      addServerHandler({
-        route: options.healthCheckPath,
-        method: 'get',
-        handler: resolve('./runtime/health'),
+    if (options.host && options.port) {
+      nuxt.options.alias['#prometheus-options'] = addTemplate({
+        filename: 'prometheus-options.mjs',
+        getContents: () => `export const config = ${JSON.stringify(moduleOptions)}`,
+        write: true,
+      }).dst
+      nuxt.hook('nitro:config', (nitro) => {
+        nitro.plugins = nitro.plugins || []
+        nitro.plugins.push(resolve('runtime/nitro-plugin'))
       })
+    }
+    else {
+      addServerHandler({
+        route: options.prometheusPath,
+        method: 'get',
+        handler: resolve('./runtime/handler'),
+      })
+
+      if (options.healthCheck) {
+        addServerHandler({
+          route: options.healthCheckPath,
+          method: 'get',
+          handler: resolve('./runtime/health'),
+        })
+      }
     }
 
     addPlugin({ src: resolve('./runtime/plugin'), mode: 'server' })

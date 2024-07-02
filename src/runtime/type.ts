@@ -16,6 +16,8 @@ export interface AnalyticsModuleState {
 }
 
 export interface AnalyticsModuleParams {
+  host?: string
+  port?: number
   /**
    * stdout logs about external requests and render time of the page
    * @default true
