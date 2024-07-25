@@ -45,4 +45,11 @@ export interface AnalyticsModuleParams {
    * @default no prefix
    */
   prefix?: string
+
+  /**
+   * Include query parameters in the URL label
+   *
+   * @default true
+   */
+  urlWithQuery: boolean
 }

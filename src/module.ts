@@ -25,6 +25,7 @@ const module: NuxtModule<Partial<AnalyticsModuleParams>> = defineNuxtModule<Part
     healthCheck: true,
     prometheusPath: '/metrics',
     healthCheckPath: '/health',
+    urlWithQuery: true,
   },
   async setup(options, nuxt) {
     const moduleOptions = defu(

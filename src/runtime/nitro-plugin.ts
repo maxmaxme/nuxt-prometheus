@@ -56,10 +56,14 @@ export default defineNitroPlugin((nitroApp) => {
 
   nitroApp.hooks.hook('afterResponse', async ({ context, node: { req, res } }) => {
     if (context.endPromTimer) {
+      let route = context.matchedRoute?.path ?? req.originalUrl
+      if (route && !config.urlWithQuery)
+        route = route.split('?')[0]
+
       try {
         context.endPromTimer({
           method: req.method,
-          route: context.matchedRoute?.path ?? req.originalUrl,
+          route,
           code: res.statusCode,
         })
       }
